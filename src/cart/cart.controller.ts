@@ -26,34 +26,27 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Post()
-  create(
-    @Body() createCartDto: CreateCartDto,
-    @CurrentUser() user: UserPayload,
-  ) {
-    return this.cartService.create(createCartDto, user?.id);
+  create(@Body() createCartDto: CreateCartDto, @CurrentUser('id') id: string) {
+    return this.cartService.create(createCartDto);
   }
 
   @Get()
-  findAll(@CurrentUser() user: UserPayload) {
-    return this.cartService.findAll(user?.id);
+  findAll(@CurrentUser('id') id: string) {
+    return this.cartService.findAll(id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @CurrentUser() user: UserPayload) {
-    return this.cartService.findOne(id, user?.id);
+  findOne(@CurrentUser('id') id: string) {
+    return this.cartService.findOne(id);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateCartDto: UpdateCartDto,
-    @CurrentUser() user: UserPayload,
-  ) {
-    return this.cartService.update(id, updateCartDto, user?.id);
+  update(@Body() updateCartDto: UpdateCartDto, @CurrentUser('id') id: string) {
+    return this.cartService.update(id, updateCartDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @CurrentUser() user: UserPayload) {
-    return this.cartService.remove(id, user?.id);
+  remove(@CurrentUser('id') id: string) {
+    return this.cartService.remove(id);
   }
 }

@@ -23,7 +23,7 @@ export class RegisterDto {
   })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiProperty({
     example: 'budi@email.com',
@@ -31,7 +31,7 @@ export class RegisterDto {
   })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example: 'password123',
@@ -41,7 +41,7 @@ export class RegisterDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
-  password: string;
+  password!: string;
 
   @ApiProperty({
     example: UserRole.BUYER,

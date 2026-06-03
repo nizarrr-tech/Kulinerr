@@ -15,13 +15,13 @@ export class LoginDto {
   })
   @IsEmail2()
   @IsNotEmpty2()
-  email: string;
+  email!: string;
 
   @ApiProp2({
     example: 'password123',
     description: 'Password akun',
-  })
+ })
   @IsNotEmpty2()
   @IsString2()
-  password: string;
+  password!: string;
 }

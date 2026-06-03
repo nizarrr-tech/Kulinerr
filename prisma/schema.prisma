@@ -1,6 +1,8 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma/client"
+  provider      = "prisma-client"
+  output        = "../generated/prisma"
+  compilerBuild = "fast"
+  moduleFormat  = "cjs"
 }
 
 datasource db {
@@ -43,7 +45,7 @@ model Food {
   name        String
   description String
   price       Int
-  stock       Int      @default(0)
+  stock       Int       @default(0)
   imageUrl    String?
   categoryId  String?
   sellerId    String?
@@ -57,14 +59,14 @@ model Food {
 }
 
 model Cart {
-  id        String   @id @default(uuid())
-  quantity  Int      @default(1)
+  id         String   @id @default(uuid())
+  quantity   Int      @default(1)
   customerId String
-  foodId    String
-  customer  User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  food      Food     @relation(fields: [foodId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  foodId     String
+  customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  food       Food     @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([customerId, foodId])
   @@map("carts")

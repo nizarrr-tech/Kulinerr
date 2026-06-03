@@ -1,33 +1,21 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
+import { BcryptService } from 'src/bcrypt/bcrypt.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { BcryptModule } from 'src/bcrypt/bcrypt.module';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { StringValue } from 'ms';
 
 @Global()
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    JwtModule.registerAsync({
+    JwtModule.register({
       global: true,
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret:
-          configService.get<string>('JWT_SECRET') ??
-          'rahasia_wong_lumajang_123',
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN') ?? '1h',
-        },
-      }),
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN as StringValue },
     }),
-    PrismaModule,
-    BcryptModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, BcryptService],
 })
 export class AuthModule {}

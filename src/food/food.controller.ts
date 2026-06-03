@@ -28,9 +28,9 @@ export class FoodController {
   @Post()
   create(
     @Body() createFoodDto: CreateFoodDto,
-    @CurrentUser() user: UserPayload,
+    @CurrentUser('id') id: string,
   ) {
-    return this.foodService.create(createFoodDto, user?.id);
+    return this.foodService.create(createFoodDto, id);
   }
 
   @Get()
