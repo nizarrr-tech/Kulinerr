@@ -2,16 +2,20 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
+import databaseConfig from './config/database.config';
+
 // Import Modul Fitur
 import { AuthModule } from './modules/auth/auth.module';
 import { FoodsModule } from './modules/foods/foods.module';
 import { CartsModule } from './modules/carts/carts.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
     // 1. Mengaktifkan ConfigModule agar NestJS bisa membaca file .env (jika ada)
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [databaseConfig],
     }),
 
     // 2. Konfigurasi Koneksi Database TypeORM (MySQL)
@@ -37,6 +41,7 @@ import { CartsModule } from './modules/carts/carts.module';
     // 3. Registrasi Seluruh Modul Fitur Aplikasi
     AuthModule,
     FoodsModule,
+    PrismaModule,
     CartsModule,
   ],
   controllers: [],
