@@ -1,0 +1,714 @@
+{
+  "info": {
+    "name": "SPA-LMJ — Marketplace Kuliner",
+    "description": "Koleksi lengkap API Marketplace Kuliner. \n\n**Cara pakai:**\n1. Import file ini ke Postman\n2. Set variable `baseUrl` jika perlu (default: http://localhost:3000/api)\n3. Jalankan Register → Login → salin token ke variable `token`\n4. Semua request yang butuh auth sudah otomatis pakai `{{token}}`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Isi dengan access_token dari response Login"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "foodId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cartId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "description": "Registrasi dan login. Jalankan Login dulu untuk mendapatkan token.",
+      "item": [
+        {
+          "name": "Register (Buyer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"budi@email.com\",\n  \"password\": \"password123\",\n  \"role\": \"buyer\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Daftarkan akun baru sebagai buyer.\nRole: buyer | seller (default: buyer)"
+          }
+        },
+        {
+          "name": "Register (Seller)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Warung Pak Slamet\",\n  \"email\": \"slamet@email.com\",\n  \"password\": \"password123\",\n  \"role\": \"seller\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Daftarkan akun baru sebagai seller."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "  pm.collectionVariables.set('token', res.access_token);",
+                  "  pm.collectionVariables.set('userId', res.user.id);",
+                  "  console.log('Token tersimpan otomatis!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"budi@email.com\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login dan dapatkan JWT token.\n\n✅ Token otomatis tersimpan ke variable {{token}} via test script."
+          }
+        },
+        {
+          "name": "Login (Seller)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "  pm.collectionVariables.set('token', res.access_token);",
+                  "  pm.collectionVariables.set('userId', res.user.id);",
+                  "  console.log('Token seller tersimpan!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"slamet@email.com\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login sebagai seller. Token otomatis tersimpan ke {{token}}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Users",
+      "description": "Manajemen data pengguna.",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Ambil semua user. Tidak butuh auth."
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            },
+            "description": "Ambil profil user yang sedang login."
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Ambil user berdasarkan ID.\nGanti {{userId}} atau isi variable."
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Santoso Updated\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Update data user. Semua field opsional (partial update).\nField yang bisa diupdate: name, email, password"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Hapus user berdasarkan ID."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Category",
+      "description": "Manajemen kategori makanan. Buat category dulu sebelum membuat food.",
+      "item": [
+        {
+          "name": "Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "  pm.collectionVariables.set('categoryId', res.id);",
+                  "  console.log('categoryId tersimpan: ' + res.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Makanan Berat\",\n  \"description\": \"Aneka nasi, lauk, dan makanan berat lainnya\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/category",
+              "host": ["{{baseUrl}}"],
+              "path": ["category"]
+            },
+            "description": "Buat kategori baru.\nField: name (wajib), description (opsional)\n\n✅ categoryId otomatis tersimpan ke variable."
+          }
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/category",
+              "host": ["{{baseUrl}}"],
+              "path": ["category"]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/category/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["category", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Makanan Berat Updated\",\n  \"description\": \"Deskripsi baru\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/category/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["category", "{{categoryId}}"]
+            },
+            "description": "Semua field opsional (partial update)."
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/category/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["category", "{{categoryId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Food",
+      "description": "Manajemen menu makanan. Login sebagai seller untuk create/update/delete.",
+      "item": [
+        {
+          "name": "Create Food (Seller)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "  pm.collectionVariables.set('foodId', res.id);",
+                  "  console.log('foodId tersimpan: ' + res.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rawon Daging\",\n  \"description\": \"Rawon khas Jawa Timur dengan daging empuk\",\n  \"price\": 25000,\n  \"stock\": 20,\n  \"imageUrl\": \"https://example.com/rawon.jpg\",\n  \"categoryId\": \"{{categoryId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/food",
+              "host": ["{{baseUrl}}"],
+              "path": ["food"]
+            },
+            "description": "Buat menu makanan baru (harus login sebagai seller).\n\nField wajib: name, description, price\nField opsional: stock (default 0), imageUrl, categoryId, sellerId\n\n✅ foodId otomatis tersimpan ke variable."
+          }
+        },
+        {
+          "name": "Get All Foods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/food",
+              "host": ["{{baseUrl}}"],
+              "path": ["food"]
+            },
+            "description": "Ambil semua menu. Tidak butuh auth."
+          }
+        },
+        {
+          "name": "Get Food by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/food/{{foodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["food", "{{foodId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Food",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 27000,\n  \"stock\": 15\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/food/{{foodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["food", "{{foodId}}"]
+            },
+            "description": "Update data food. Semua field opsional.\nField: name, description, price, stock, imageUrl, categoryId"
+          }
+        },
+        {
+          "name": "Delete Food",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/food/{{foodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["food", "{{foodId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Cart",
+      "description": "Keranjang belanja buyer. Semua endpoint butuh login sebagai buyer.",
+      "item": [
+        {
+          "name": "Add to Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "  pm.collectionVariables.set('cartId', res.id);",
+                  "  console.log('cartId tersimpan: ' + res.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"foodId\": \"{{foodId}}\",\n  \"quantity\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Tambah makanan ke keranjang.\nJika food yang sama ditambah lagi, quantity akan di-increment (upsert).\n\nField: foodId (wajib), quantity (opsional, default 1)\n\n✅ cartId otomatis tersimpan ke variable."
+          }
+        },
+        {
+          "name": "Get My Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Ambil semua item di keranjang buyer yang login."
+          }
+        },
+        {
+          "name": "Get Cart Item by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cart/{{cartId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "{{cartId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart/{{cartId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "{{cartId}}"]
+            },
+            "description": "Update quantity atau foodId item di keranjang.\nField opsional: foodId, quantity"
+          }
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cart/{{cartId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "{{cartId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Transaction",
+      "description": "Fitur transaksi. Buyer membuat & membatalkan. Seller mengupdate status.",
+      "item": [
+        {
+          "name": "Create Transaction (Manual)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "  pm.collectionVariables.set('transactionId', res.id);",
+                  "  console.log('transactionId tersimpan: ' + res.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"foodId\": \"{{foodId}}\",\n      \"quantity\": 2\n    }\n  ],\n  \"notes\": \"Tanpa sambal\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transaction",
+              "host": ["{{baseUrl}}"],
+              "path": ["transaction"]
+            },
+            "description": "Buyer membuat transaksi baru secara manual.\nStok food akan otomatis berkurang.\n\nField: items (wajib, min 1 item), notes (opsional)\nSetiap item: foodId (wajib), quantity (wajib, min 1)\n\n✅ transactionId otomatis tersimpan ke variable."
+          }
+        },
+        {
+          "name": "Checkout from Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "  pm.collectionVariables.set('transactionId', res.id);",
+                  "  console.log('transactionId tersimpan: ' + res.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Tambah es teh ya\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transaction/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["transaction", "checkout"]
+            },
+            "description": "Buyer checkout semua item dari keranjang.\nKeranjang akan dikosongkan otomatis setelah transaksi dibuat.\n\nBody opsional — boleh kirim {} jika tidak ada catatan."
+          }
+        },
+        {
+          "name": "Get My Transactions (Buyer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transaction",
+              "host": ["{{baseUrl}}"],
+              "path": ["transaction"]
+            },
+            "description": "Buyer: mendapat transaksi miliknya sendiri.\nSeller: mendapat semua transaksi."
+          }
+        },
+        {
+          "name": "Get All Transactions (Seller)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transaction/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["transaction", "all"]
+            },
+            "description": "Hanya seller yang bisa akses endpoint ini.\nMengembalikan semua transaksi dari semua buyer."
+          }
+        },
+        {
+          "name": "Get Transaction by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transaction/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["transaction", "{{transactionId}}"]
+            },
+            "description": "Detail transaksi.\nBuyer hanya bisa lihat transaksinya sendiri.\nSeller bisa lihat semua."
+          }
+        },
+        {
+          "name": "Update Transaction Status (Seller)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paid\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transaction/{{transactionId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["transaction", "{{transactionId}}", "status"]
+            },
+            "description": "Seller mengupdate status transaksi.\n\nAlur status: pending → paid → processing → completed\nAtau: pending → cancelled\n\nNilai yang valid:\n- pending\n- paid\n- processing\n- completed\n- cancelled"
+          }
+        },
+        {
+          "name": "Cancel Transaction (Buyer)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transaction/{{transactionId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["transaction", "{{transactionId}}", "cancel"]
+            },
+            "description": "Buyer membatalkan transaksi miliknya.\nHanya bisa dibatalkan jika status masih 'pending'.\nStok food akan dikembalikan otomatis."
+          }
+        }
+      ]
+    }
+  ]
+}

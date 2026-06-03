@@ -42,6 +42,7 @@ export class FoodController {
   findOne(@Param('id') id: string) {
     return this.foodService.findOne(id);
   }
+  
 
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)

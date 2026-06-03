@@ -16,15 +16,16 @@ enum UserRole {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String?
-  email     String   @unique
-  password  String
-  role      UserRole @default(buyer)
-  carts     Cart[]
-  foods     Food[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(uuid())
+  name         String?
+  email        String        @unique
+  password     String
+  role         UserRole      @default(buyer)
+  carts        Cart[]
+  foods        Food[]
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   @@map("users")
 }
@@ -41,19 +42,20 @@ model Category {
 }
 
 model Food {
-  id          String    @id @default(uuid())
-  name        String
-  description String
-  price       Int
-  stock       Int       @default(0)
-  imageUrl    String?
-  categoryId  String?
-  sellerId    String?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  seller      User?     @relation(fields: [sellerId], references: [id], onDelete: SetNull)
-  carts       Cart[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               String            @id @default(uuid())
+  name             String
+  description      String
+  price            Int
+  stock            Int               @default(0)
+  imageUrl         String?
+  categoryId       String?
+  sellerId         String?
+  category         Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  seller           User?             @relation(fields: [sellerId], references: [id], onDelete: SetNull)
+  carts            Cart[]
+  transactionItems TransactionItem[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   @@map("foods")
 }
@@ -70,4 +72,41 @@ model Cart {
 
   @@unique([customerId, foodId])
   @@map("carts")
+}
+
+enum TransactionStatus {
+  pending
+  paid
+  processing
+  completed
+  cancelled
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  customerId  String
+  customer    User              @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  status      TransactionStatus @default(pending)
+  totalAmount Int
+  notes       String?
+  items       TransactionItem[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("transactions")
+}
+
+model TransactionItem {
+  id            String      @id @default(uuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  foodId        String
+  food          Food        @relation(fields: [foodId], references: [id], onDelete: Restrict)
+  quantity      Int
+  price         Int
+  subtotal      Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("transaction_items")
 }

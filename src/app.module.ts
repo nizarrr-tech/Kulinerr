@@ -5,6 +5,7 @@ import { CartModule } from './cart/cart.module';
 import { CategoryModule } from './category/category.module';
 import { FoodModule } from './food/food.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { TransactionModule } from './transaction/transaction.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { UsersModule } from './users/users.module';
     CategoryModule,
     CartModule,
     FoodModule,
+    TransactionModule,
   ],
   controllers: [],
   providers: [],
