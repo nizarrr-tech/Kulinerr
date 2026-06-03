@@ -1,26 +1,76 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createCategoryDto: CreateCategoryDto) {
+    const existingCategory = await this.prisma.category.findFirst({
+      where: { name: createCategoryDto.name },
+    });
+
+    if (existingCategory) {
+      throw new ConflictException('Kategori sudah ada');
+    }
+
+    return this.prisma.category.create({
+      data: createCategoryDto,
+      include: { foods: true },
+    });
   }
 
-  findAll() {
-    return `This action returns all category`;
+  async findAll() {
+    return this.prisma.category.findMany({
+      include: { foods: true },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+      include: { foods: true },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with id ${id} not found`);
+    }
+
+    return category;
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+    await this.findOne(id);
+
+    if (updateCategoryDto.name) {
+      const existingCategory = await this.prisma.category.findFirst({
+        where: { name: updateCategoryDto.name, NOT: { id } },
+      });
+
+      if (existingCategory) {
+        throw new ConflictException('Kategori sudah ada');
+      }
+    }
+
+    return this.prisma.category.update({
+      where: { id },
+      data: updateCategoryDto,
+      include: { foods: true },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: string) {
+    await this.findOne(id);
+
+    return this.prisma.category.delete({
+      where: { id },
+    });
   }
 }

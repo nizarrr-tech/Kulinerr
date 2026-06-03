@@ -1,76 +1,103 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { BcryptService } from 'src/bcrypt/bcrypt.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly bcryptService: BcryptService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    try {
-      return await this.prisma.user.create({
-        data: createUserDto,
-      });
-    } catch (error) {
-      throw error;
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email sudah terdaftar');
     }
+
+    const hashedPassword = await this.bcryptService.hashPassword(
+      createUserDto.password,
+    );
+
+    const user = await this.prisma.user.create({
+      data: {
+        ...createUserDto,
+        role: createUserDto.role as never,
+        password: hashedPassword,
+      },
+    });
+
+    return this.excludePassword(user);
   }
 
   async findAll() {
-    try {
-      return await this.prisma.user.findMany();
-    } catch (error) {
-      throw error;
-    }
+    const users = await this.prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return users.map((user) => this.excludePassword(user));
   }
 
   async findOne(id: string) {
-    try {
-      const user = await this.prisma.user.findUnique({
-        where: { id },
-      });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
 
-      if (!user) {
-        throw new NotFoundException(`User with id ${id} not found`);
-      }
-
-      return user;
-    } catch (error) {
-      throw error;
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
     }
+
+    return this.excludePassword(user);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    try {
-      const user = await this.prisma.user.update({
-        where: { id },
-        data: updateUserDto,
+    await this.findOne(id);
+
+    if (updateUserDto.email) {
+      const existingUser = await this.prisma.user.findFirst({
+        where: { email: updateUserDto.email, NOT: { id } },
       });
 
-      if (!user) {
-        throw new NotFoundException(`User with id ${id} not found`);
+      if (existingUser) {
+        throw new ConflictException('Email sudah terdaftar');
       }
-
-      return user;
-    } catch (error) {
-      throw error;
     }
+
+    const data = { ...updateUserDto };
+
+    if (data.password) {
+      data.password = await this.bcryptService.hashPassword(data.password);
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: data as never,
+    });
+
+    return this.excludePassword(user);
   }
 
   async remove(id: string) {
-    try {
-      const user = await this.prisma.user.delete({
-        where: { id },
-      });
+    await this.findOne(id);
 
-      if (!user) {
-        throw new NotFoundException(`User with id ${id} not found`);
-      }
+    const user = await this.prisma.user.delete({
+      where: { id },
+    });
 
-      return user;
-    } catch (error) {
-      throw error;
-    }
+    return this.excludePassword(user);
+  }
+
+  private excludePassword<T extends { password: string }>(user: T) {
+    const { password, ...result } = user;
+    return result;
   }
 }

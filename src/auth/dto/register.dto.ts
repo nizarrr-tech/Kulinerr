@@ -54,5 +54,3 @@ export class RegisterDto {
   @IsEnum(UserRole)
   role?: UserRole;
 }
-
-

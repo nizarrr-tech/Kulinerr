@@ -40,12 +40,18 @@ class RegisterResponseDto {
 class LoginResponseDto {
   @ApiProperty({
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-    description: 'JWT access token. Gunakan di header: Authorization: Bearer <token>',
+    description:
+      'JWT access token. Gunakan di header: Authorization: Bearer <token>',
   })
   access_token: string;
 
   @ApiProperty({
-    example: { id: 1, name: 'Budi Santoso', email: 'budi@email.com', role: 'buyer' },
+    example: {
+      id: 1,
+      name: 'Budi Santoso',
+      email: 'budi@email.com',
+      role: 'buyer',
+    },
   })
   user: object;
 }
@@ -54,14 +60,15 @@ class ErrorResponseDto {
   @ApiProperty({ example: 400 })
   statusCode: number;
 
-  @ApiProperty({ example: ['email must be an email', 'password should not be empty'] })
+  @ApiProperty({
+    example: ['email must be an email', 'password should not be empty'],
+  })
   message: string[];
 
   @ApiProperty({ example: 'Bad Request' })
   error: string;
 }
 // ─────────────────────────────────────────────────────────────────────────
-
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -76,13 +83,14 @@ export class AuthController {
       'Membuat akun pengguna baru. Role default adalah **buyer**. ' +
       'Gunakan role **seller** jika ingin berjualan.',
   })
-  @ApiBody({ type: RegisterDto })                   // <-- INI yang bind skema ke Swagger UI
+  @ApiBody({ type: RegisterDto }) // <-- INI yang bind skema ke Swagger UI
   @ApiCreatedResponse({
     description: 'Akun berhasil dibuat',
     type: RegisterResponseDto,
   })
   @ApiBadRequestResponse({
-    description: 'Validasi gagal (field kosong / format email salah / password kurang dari 6 karakter)',
+    description:
+      'Validasi gagal (field kosong / format email salah / password kurang dari 6 karakter)',
     type: ErrorResponseDto,
   })
   @ApiConflictResponse({ description: 'Email sudah terdaftar' })
