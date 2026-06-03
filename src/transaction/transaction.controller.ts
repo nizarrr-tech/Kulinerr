@@ -22,6 +22,7 @@ import { Role } from 'src/auth/decorators/role.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/role.guard';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { CheckoutDto } from './dto/checkout.dto';
 import { UpdateTransactionStatusDto } from './dto/update-transaction-status.dto';
 import { TransactionService } from './transaction.service';
 
@@ -62,10 +63,10 @@ export class TransactionController {
   @ApiResponse({ status: 201, description: 'Checkout berhasil' })
   @ApiResponse({ status: 400, description: 'Keranjang kosong / stok tidak cukup' })
   checkout(
-    @Body('notes') notes: string | undefined,
+    @Body() checkoutDto: CheckoutDto,
     @CurrentUser() user: UserPayload,
   ) {
-    return this.transactionService.checkoutFromCart(notes, user.id);
+    return this.transactionService.checkoutFromCart(checkoutDto.notes, user.id);
   }
 
   // ── GET /transaction ──────────────────────────────────────────────────
