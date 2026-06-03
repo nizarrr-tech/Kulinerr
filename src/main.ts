@@ -7,7 +7,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // 1. Aktifkan CORS agar API bisa diakses oleh aplikasi Frontend (React/Next.js/Vue)
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.FRONTEND_URL, // Izinkan origin dari frontend
+    credentials: true, // Izinkan pengiriman credentials (cookie, authorization header)
+  });
 
   // 2. Set global prefix untuk semua endpoint (Misal: http://localhost:3000/api/foods)
   app.setGlobalPrefix('api');
@@ -54,10 +57,5 @@ async function bootstrap() {
   // 5. Taktik Dynamic Port untuk Railway Cloud / Mode Lokal
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  
-  console.log(`===========================================================`);
-  console.log(`🚀 Aplikasi berjalan di      : http://localhost:${port}`);
-  console.log(`📖 Dokumentasi Swagger di    : http://localhost:${port}/api`);
-  console.log(`===========================================================`);
 }
 bootstrap();
