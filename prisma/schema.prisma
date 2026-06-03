@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  buyer
+  seller
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      UserRole @default(buyer)
+  carts     Cart[]
+  foods     Food[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  foods       Food[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Food {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  price       Int
+  stock       Int      @default(0)
+  imageUrl    String?
+  categoryId  String?
+  sellerId    String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  seller      User?     @relation(fields: [sellerId], references: [id], onDelete: SetNull)
+  carts       Cart[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("foods")
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(1)
+  customerId String
+  foodId    String
+  customer  User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  food      Food     @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([customerId, foodId])
+  @@map("carts")
+}
