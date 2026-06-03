@@ -18,9 +18,9 @@ async function bootstrap() {
   // 3. Aktifkan Global Validation Pipe untuk class-validator di DTO
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,            // Membuang properti yang tidak ada di DTO
+      whitelist: true, // Membuang properti yang tidak ada di DTO
       forbidNonWhitelisted: true, // Berikan error jika mengirim properti ilegal
-      transform: true,            // Otomatis mengubah tipe data query/param sesuai tipe DTO
+      transform: true, // Otomatis mengubah tipe data query/param sesuai tipe DTO
     }),
   );
 
@@ -29,7 +29,7 @@ async function bootstrap() {
     .setTitle('Marketplace Kuliner Malang API')
     .setDescription(
       'Dokumentasi API lengkap untuk Marketplace Kuliner Malang. ' +
-      'Gunakan token JWT pada tombol Authorize untuk mengakses endpoint yang terkunci (🔒).',
+        'Gunakan token JWT pada tombol Authorize untuk mengakses endpoint yang terkunci (🔒).',
     )
     .setVersion('1.0')
     .addBearerAuth(
@@ -46,7 +46,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  
+
   // Swagger akan dapat diakses di: /api (atau ganti 'api' jika ingin /docs)
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
