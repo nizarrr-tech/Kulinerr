@@ -56,6 +56,12 @@ async function bootstrap() {
 
   // 5. Taktik Dynamic Port untuk Railway Cloud / Mode Lokal
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`\n🚀 Server berjalan di   : http://localhost:${port}`);
+  console.log(`📖 Swagger UI tersedia  : http://localhost:${port}/api\n`);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('❌ Fatal error saat startup:', err);
+  process.exit(1);
+});
